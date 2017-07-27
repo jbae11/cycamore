@@ -234,15 +234,11 @@ class Reactor : public cyclus::Facility,
     "uitype": ["oneormore", "incommodity"], \
   }
   std::vector<std::string> recipe_change_commods;
-  #pragma cyclus var { \
-    "default": [], \
-    "uilabel": "New Recipe for Fresh Fuel", \
-    "doc": "The new input recipe to use for this recipe change." \
-           " Same order as and direct correspondence to the specified recipe " \
-           "change times.", \
-    "uitype": ["oneormore", "recipe"], \
-  }
-  std::vector<std::string> recipe_change_in;
+
+  //
+  //recipe_change_in deleted because it serves no purpose
+  //
+
   #pragma cyclus var { \
     "default": [], \
     "uilabel": "New Recipe for Spent Fuel", \
@@ -253,6 +249,27 @@ class Reactor : public cyclus::Facility,
   }
   std::vector<std::string> recipe_change_out;
   
+  //////////// commodity changes ////////////
+  #pragma cyclus var { \
+    "default": [], \
+    "uilabel": "New Commodity for Fresh Fuel", \
+    "doc": "The new input commodity to use for this commodity change." \
+           " Same order as and direct correspondence to the specified commodity " \
+           "change times.", \
+    "uitype": ["oneormore", "incommodity"], \
+  }
+  std::vector<std::string> comm_change_in;
+
+  #pragma cyclus var { \
+    "default": [], \
+    "uilabel": "New Commodity for Spent Fuel", \
+    "doc": "The new output commodity to use for this commodity change." \
+           " Same order as and direct correspondence to the specified commodity " \
+           "change times.", \
+    "uitype": ["oneormore", "outcommodity"], \
+  }
+  std::vector<std::string> comm_change_out;
+
  //////////// inventory and core params ////////////
   #pragma cyclus var { \
     "doc": "Mass (kg) of a single assembly.",	\

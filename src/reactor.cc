@@ -61,8 +61,8 @@ void Reactor::EnterNotify() {
       fuel_prefs.push_back(cyclus::kDefaultPref);
     }
   }
-
-  // input consistency checking:
+  // here
+  // input consistency checking for recipe and commodity change:
   int n = recipe_change_times.size();
   std::stringstream ss;
   if (recipe_change_commods.size() != n) {
@@ -70,15 +70,20 @@ void Reactor::EnterNotify() {
        << recipe_change_commods.size()
        << " recipe_change_commods vals, expected " << n << "\n";
   }
-  if (recipe_change_in.size() != n) {
-    ss << "prototype '" << prototype() << "' has " << recipe_change_in.size()
-       << " recipe_change_in vals, expected " << n << "\n";
-  }
   if (recipe_change_out.size() != n) {
     ss << "prototype '" << prototype() << "' has " << recipe_change_out.size()
        << " recipe_change_out vals, expected " << n << "\n";
   }
+  if (comm_change_in.size() != n) {
+    ss << "prototype '" << prototype() << "' has " << comm_change_in.size()
+       << " comm_change_in vals, expected " << n << "\n";
+  }
+  if (comm_change_out.size() != n) {
+    ss << "prototype '" << prototype() << "' has " << comm_change_out.size()
+       << " comm_change_out vals, expected " << n << "\n";
+  }
 
+  // input consistency checking for preference change:
   n = pref_change_times.size();
   if (pref_change_commods.size() != n) {
     ss << "prototype '" << prototype() << "' has " << pref_change_commods.size()
@@ -166,8 +171,8 @@ void Reactor::Tick() {
       }
     }
   }
-
-  // update recipes
+  // here
+  // update recipes and commodities
   for (int i = 0; i < recipe_change_times.size(); i++) {
     int change_t = recipe_change_times[i];
     if (t != change_t) {
@@ -177,7 +182,8 @@ void Reactor::Tick() {
     std::string incommod = recipe_change_commods[i];
     for (int j = 0; j < fuel_incommods.size(); j++) {
       if (fuel_incommods[j] == incommod) {
-        fuel_inrecipes[j] = recipe_change_in[i];
+        fuel_incommods[j] = comm_change_in[i];
+        fuel_outcommods[j] = comm_chang_out[i];
         fuel_outrecipes[j] = recipe_change_out[i];
         break;
       }
