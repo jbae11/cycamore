@@ -61,29 +61,38 @@ void Reactor::EnterNotify() {
       fuel_prefs.push_back(cyclus::kDefaultPref);
     }
   }
-  // here
-  // input consistency checking for recipe and commodity change:
-  int n = recipe_change_times.size();
+
+  // input consistency checking for cycle param change:
+  int n = cycle_change_times.size();
   std::stringstream ss;
+  if (new_cycle_time.size() != n) {
+    ss << "prototype ' " << prototype() << "' has "
+       << new_cycle_time.size()
+       << " new_cycle_time vals, expected " << n << "\n";
+  }
+  if (new_refuel_time.size() != n) {
+    ss << "prototype ' " << prototype() << "' has "
+       << new_refuel_time.size()
+       << " new_refuel_time vals, expected " << n << "\n";
+  }
+
+
+  // input consistency checking:
+  n = recipe_change_times.size();
   if (recipe_change_commods.size() != n) {
     ss << "prototype '" << prototype() << "' has "
        << recipe_change_commods.size()
        << " recipe_change_commods vals, expected " << n << "\n";
   }
+  if (recipe_change_in.size() != n) {
+    ss << "prototype '" << prototype() << "' has " << recipe_change_in.size()
+       << " recipe_change_in vals, expected " << n << "\n";
+  }
   if (recipe_change_out.size() != n) {
     ss << "prototype '" << prototype() << "' has " << recipe_change_out.size()
        << " recipe_change_out vals, expected " << n << "\n";
   }
-  if (comm_change_in.size() != n) {
-    ss << "prototype '" << prototype() << "' has " << comm_change_in.size()
-       << " comm_change_in vals, expected " << n << "\n";
-  }
-  if (comm_change_out.size() != n) {
-    ss << "prototype '" << prototype() << "' has " << comm_change_out.size()
-       << " comm_change_out vals, expected " << n << "\n";
-  }
 
-  // input consistency checking for preference change:
   n = pref_change_times.size();
   if (pref_change_commods.size() != n) {
     ss << "prototype '" << prototype() << "' has " << pref_change_commods.size()
@@ -142,6 +151,18 @@ void Reactor::Tick() {
     return;
   }
 
+  int t = context()->time();
+  // update cycle params
+  for (int i = 0; i < cycle_change_times.size(); i++)  {
+    int change_t = cycle_change_times[i];
+    if (t != change_t) {
+      continue;
+    }
+      cycle_time = new_cycle_time[i];
+      refuel_time = new_refuel_time[i];
+      break;
+  }
+
   if (cycle_step == cycle_time) {
     Transmute();
     Record("CYCLE_END", "");
@@ -154,7 +175,7 @@ void Reactor::Tick() {
     Load();
   }
 
-  int t = context()->time();
+  
 
   // update preferences
   for (int i = 0; i < pref_change_times.size(); i++) {
@@ -171,8 +192,9 @@ void Reactor::Tick() {
       }
     }
   }
-  // here
-  // update recipes and commodities
+
+
+  // update recipes
   for (int i = 0; i < recipe_change_times.size(); i++) {
     int change_t = recipe_change_times[i];
     if (t != change_t) {
@@ -182,8 +204,7 @@ void Reactor::Tick() {
     std::string incommod = recipe_change_commods[i];
     for (int j = 0; j < fuel_incommods.size(); j++) {
       if (fuel_incommods[j] == incommod) {
-        fuel_incommods[j] = comm_change_in[i];
-        fuel_outcommods[j] = comm_chang_out[i];
+        fuel_inrecipes[j] = recipe_change_in[i];
         fuel_outrecipes[j] = recipe_change_out[i];
         break;
       }
