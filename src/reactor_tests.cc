@@ -389,6 +389,35 @@ TEST(ReactorTests, PrefChange) {
   EXPECT_EQ(25, qr.rows.size()) << "failed to adjust preferences properly";
 }
 
+TEST(ReactorTests, CycleChange) {
+  // it is important that the fuel_prefs not be present in the config below.
+  std::string config = 
+     "  <fuel_inrecipes>  <val>lwr_fresh</val>  </fuel_inrecipes>  "
+     "  <fuel_outrecipes> <val>lwr_spent</val>  </fuel_outrecipes>  "
+     "  <fuel_incommods>  <val>enriched_u</val> </fuel_incommods>  "
+     "  <fuel_outcommods> <val>waste</val>      </fuel_outcommods>  "
+     ""
+     "  <cycle_time>2</cycle_time>  "
+     "  <refuel_time>1</refuel_time>  "
+     "  <assem_size>3000</assem_size>  "
+     "  <n_assem_core>3</n_assem_core>  "
+     "  <n_assem_batch>1</n_assem_batch>  "
+     ""
+     "  <cycle_change_times> <val>10</val> <val>20</val> </cycle_change_times>"
+     "  <new_cycle_time> <val>3</val> <val>5</val> </new_cycle_time>"
+     "  <new_refuel_time> <val>2</val> <val>3</val> </new_refuel_time>";
+
+  int simdur = 50;
+  cyclus::MockSim sim(cyclus::AgentSpec(":cycamore:Reactor"), config, simdur);
+  sim.AddSource("enriched_u").Finalize();
+  sim.AddRecipe("lwr_fresh", c_uox());
+  sim.AddRecipe("lwr_spent", c_spentuox());
+  int id = sim.Run();
+
+  QueryResult qr = sim.db().Query("Transactions", NULL);
+  EXPECT_EQ(12, qr.rows.size()) << "failed to adjust cycle parameters properly";
+}
+
 TEST(ReactorTests, RecipeChange) {
   // it is important that the fuel_prefs not be present in the config below.
   std::string config = 
