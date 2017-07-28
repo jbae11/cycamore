@@ -1,0 +1,276 @@
+<!-- This input file is to demonstrate the `Reactor` archetype capability
+     to change incommod, outcommod, outrecipe, 
+     1 Reactor, 1 Repo, 3 Sources
+     Reactor requests commodity one, two, three, then one. (changes every 10 timestep)
+     Reactor offers commodity waste, waste2, waste3, then waste. (Changes every 10 timestep)
+     3 Sources offer commodity one, two, three, respectively.
+     Sink requests commodities waste, waste2, waste3. 
+
+     A successful simulation should have the reactor take in 
+     one, two, three, then one,
+     and spit out(?)
+     waste, waste2, waste3, then waste.
+     Throughout the simulation.
+-->
+<simulation>
+  <control>
+    <duration>50</duration>
+    <startmonth>1</startmonth>
+    <startyear>2000</startyear>
+  </control>
+
+  <archetypes>
+    <spec> <lib>agents</lib> <name>NullInst</name></spec>
+    <spec> <lib>agents</lib> <name>NullRegion</name></spec>
+    <spec> <lib>cycamore</lib> <name>Source</name></spec>
+    <spec> <lib>cycamore</lib> <name>Sink</name></spec>
+    <spec> <lib>cycamore</lib> <name>Enrichment</name> </spec>
+    <spec> <lib>cycamore</lib> <name>Reactor</name> </spec>
+    <spec> <lib>cycamore</lib> <name>FuelFab</name> </spec>
+    <spec> <lib>cycamore</lib> <name>Separations</name> </spec>
+  </archetypes>
+
+
+  <facility>
+    <name>reactor</name>
+    <config>
+      <Reactor>
+        <fuel_inrecipes>    <val>one_recipe</val>    </fuel_inrecipes>
+        <fuel_outrecipes>   <val>one_waste_recipe</val>    </fuel_outrecipes>
+        <fuel_incommods>    <val>one</val>        </fuel_incommods>
+        <fuel_outcommods>   <val>waste</val>      </fuel_outcommods>
+        <fuel_prefs>        <val>1.0</val>          </fuel_prefs>
+
+        <recipe_change_times>
+          <val>6</val>
+          <val>12</val>
+          <val>18</val>
+        </recipe_change_times>
+        <recipe_change_commods>
+          <val>one</val>
+          <val>one</val>
+          <val>one</val>
+        </recipe_change_commods>
+        <recipe_change_out>
+          <val>two_waste_recipe</val>
+          <val>three_waste_recipe</val>
+          <val>one_waste_recipe</val>
+        </recipe_change_out>
+        <recipe_change_in>
+          <val>one_recipe</val>
+          <val>one_recipe</val>
+          <val>one_recipe</val>
+        </recipe_change_in>
+        <cycle_change_times>
+          <val>10</val>
+          <val>20</val>
+        </cycle_change_times>
+        <new_cycle_time>
+          <val>3</val>
+          <val>5</val>
+        </new_cycle_time>
+        <new_refuel_time>
+          <val>2</val>
+          <val>3</val>
+        </new_refuel_time>
+
+        <cycle_time>2</cycle_time>
+        <refuel_time>1</refuel_time>
+        <assem_size>30000</assem_size>
+        <n_assem_core>3</n_assem_core>
+        <n_assem_batch>1</n_assem_batch>
+        <power_cap>1000</power_cap>
+      </Reactor>
+    </config>
+  </facility>
+
+  <facility>
+    <name>repo</name>
+    <config>
+      <Sink>
+        <in_commods>
+          <val>waste</val>
+        </in_commods>
+        <capacity>1e299</capacity>
+      </Sink>
+    </config>
+  </facility>
+
+    <facility>
+    <name>repo2</name>
+    <config>
+      <Sink>
+        <in_commods>
+          <val>waste2</val>
+        </in_commods>
+        <capacity>1e299</capacity>
+      </Sink>
+    </config>
+  </facility>
+
+    <facility>
+    <name>repo3</name>
+    <config>
+      <Sink>
+        <in_commods>
+          <val>waste3</val>
+        </in_commods>
+        <capacity>1e299</capacity>
+      </Sink>
+    </config>
+  </facility>
+
+  <facility>
+    <name>source1</name>
+    <config>
+      <Source>
+        <outcommod>one</outcommod>
+        <outrecipe>one_recipe</outrecipe>
+      </Source>
+    </config>
+  </facility>
+
+    <facility>
+    <name>source2</name>
+    <config>
+      <Source>
+        <outcommod>two</outcommod>
+        <outrecipe>two_recipe</outrecipe>
+      </Source>
+    </config>
+  </facility>
+
+    <facility>
+    <name>source3</name>
+    <config>
+      <Source>
+        <outcommod>three</outcommod>
+        <outrecipe>three_recipe</outrecipe>
+      </Source>
+    </config>
+  </facility>
+
+  <region>
+    <name>SingleRegion</name>
+    <config><NullRegion/></config>
+    <institution>
+      <name>SingleInstitution</name>
+      <initialfacilitylist>
+
+        <entry>
+          <prototype>repo</prototype>
+          <number>1</number>
+        </entry>
+        <entry>
+          <prototype>repo2</prototype>
+          <number>1</number>
+        </entry>
+        <entry>
+          <prototype>repo3</prototype>
+          <number>1</number>
+        </entry>
+
+
+        <entry>
+          <prototype>reactor</prototype>
+          <number>1</number>
+        </entry>
+       
+
+       <entry>
+          <prototype>source1</prototype>
+          <number>1</number>
+        </entry>
+        <entry>
+          <prototype>source2</prototype>
+          <number>1</number>
+        </entry>
+        <entry>
+          <prototype>source3</prototype>
+          <number>1</number>
+        </entry>
+
+
+      </initialfacilitylist>
+      <config><NullInst/></config>
+    </institution>
+  </region>
+
+  <recipe>
+    <name>natl_u</name>
+    <basis>mass</basis>
+    <nuclide> <id>U235</id> <comp>0.711</comp> </nuclide>
+    <nuclide> <id>U238</id> <comp>99.289</comp> </nuclide>
+  </recipe>
+
+
+  <recipe>
+    <name>one_recipe</name>
+    <basis>mass</basis>
+    <nuclide> <id>U235</id><comp>0.04</comp></nuclide>
+    <nuclide><id>U238</id><comp>0.96</comp></nuclide>
+  </recipe>
+
+
+  <recipe>
+    <name>two_recipe</name>
+    <basis>mass</basis>
+    <nuclide> <id>U235</id>  <comp>0.0027381</comp> </nuclide>
+    <nuclide> <id>U238</id>  <comp>0.9099619</comp> </nuclide>
+    <nuclide> <id>Pu238</id> <comp>0.001746</comp> </nuclide>
+    <nuclide> <id>Pu239</id> <comp>0.045396</comp> </nuclide>
+    <nuclide> <id>Pu240</id> <comp>0.020952</comp> </nuclide>
+    <nuclide> <id>Pu241</id> <comp>0.013095</comp> </nuclide>
+    <nuclide> <id>Pu242</id> <comp>0.005238</comp> </nuclide>
+  </recipe>
+
+
+  <recipe>
+    <name>three_recipe</name>
+    <basis>mass</basis>
+    <nuclide> <id>U235</id><comp>0.003</comp></nuclide>
+    <nuclide><id>U238</id><comp>0.997</comp></nuclide>
+  </recipe>
+
+
+
+
+
+
+  <recipe>
+    <name>one_waste_recipe</name>
+    <basis>mass</basis>
+    <nuclide> <id>U235</id>  <comp>156.729</comp> </nuclide>
+    <nuclide> <id>U236</id>  <comp>102.103</comp> </nuclide>
+    <nuclide> <id>U238</id>  <comp>18280.324</comp> </nuclide>
+    <nuclide> <id>Np237</id> <comp>13.656</comp> </nuclide>
+    <nuclide> <id>Pu238</id> <comp>5.043</comp> </nuclide>
+    <nuclide> <id>Pu239</id> <comp>106.343</comp> </nuclide>
+    <nuclide> <id>Pu240</id> <comp>41.357</comp> </nuclide>
+    <nuclide> <id>Pu241</id> <comp>36.477</comp> </nuclide>
+    <nuclide> <id>Pu242</id> <comp>15.387</comp> </nuclide>
+    <nuclide> <id>Am241</id> <comp>1.234</comp> </nuclide>
+    <nuclide> <id>Am243</id> <comp>3.607</comp> </nuclide>
+    <nuclide> <id>Cm244</id> <comp>0.431</comp> </nuclide>
+    <nuclide> <id>Cm245</id> <comp>1.263</comp> </nuclide>
+  </recipe> 
+
+    <recipe>
+    <name>two_waste_recipe</name>
+    <basis>mass</basis>
+    <nuclide> <id>U235</id>  <comp>0.0017381</comp> </nuclide>
+    <nuclide> <id>U238</id>  <comp>0.90</comp> </nuclide>
+    <nuclide> <id>Pu238</id> <comp>0.001746</comp> </nuclide>
+    <nuclide> <id>Pu239</id> <comp>0.0134</comp> </nuclide>
+    <nuclide> <id>Pu240</id> <comp>0.020952</comp> </nuclide>
+    <nuclide> <id>Pu241</id> <comp>0.013095</comp> </nuclide>
+    <nuclide> <id>Pu242</id> <comp>0.005238</comp> </nuclide>
+  </recipe>
+
+  <recipe>
+    <name>three_waste_recipe</name>
+    <basis>mass</basis>
+    <nuclide> <id>U235</id>  <comp>1</comp> </nuclide>
+  </recipe>
+
+</simulation>
