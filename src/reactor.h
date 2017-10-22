@@ -332,6 +332,32 @@ class Reactor : public cyclus::Facility,
   }
   std::string power_name;
 
+
+  /////////// MSR params ///////////
+  #pragma cyclus var { \
+    "default": [], \
+    "uilabel": "Total Volume of Salt in Reactor System", \
+    "doc": "Total Volume of Salt in the Reactor System in m^3.",\
+  }
+  double v_salt;
+
+  #pragma cyclus var { \
+    "default": [], \
+    "uilabel": "Fraction of Salt in the Core.", \
+    "doc": "Fraction of Salt in the Core.",\
+    }
+  double core_frac;
+
+  #pragma cyclus var { \
+    "default": [], \
+    "uilabel": "Total Mass of Salt in Reactor System", \
+    "doc": "Total Mass of Salt in Reactor System",\
+  }
+  double salt_mass;
+
+
+
+
   /////////// preference changes ///////////
   #pragma cyclus var { \
     "default": [], \
