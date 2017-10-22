@@ -26,9 +26,7 @@ Reactor::Reactor(cyclus::Context* ctx)
       ///from here is MSR parameters
       v_salt(0),
       core_frac(0),
-      salt_mass(0),
-      flow_rate_in(0)
-
+      salt_mass(0)
 
 
 #pragma cyclus def clone cycamore::Reactor
