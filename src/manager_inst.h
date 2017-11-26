@@ -32,24 +32,12 @@ class ManagerInst
   /// enter the simulation and register any children present
   virtual void EnterNotify();
 
-  /// register a new child
-  virtual void BuildNotify(Agent* m);
-
-  /// unregister a child
-  virtual void DecomNotify(Agent* m);
-
   /// write information about a commodity producer to a stream
   /// @param producer the producer
   void WriteProducerInformation(cyclus::toolkit::CommodityProducer*
                                 producer);
 
  private:
-  /// register a child
-  void Register_(cyclus::Agent* agent);
-
-  /// unregister a child
-  void Unregister_(cyclus::Agent* agent);
-
   #pragma cyclus var { \
     "tooltip": "producer facility prototypes",                          \
     "uilabel": "Producer Prototype List",                               \

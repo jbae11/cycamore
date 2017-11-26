@@ -32,6 +32,7 @@ void GrowthRegion::AddCommodityDemand_(std::string commod,
 
 void GrowthRegion::EnterNotify() {
   cyclus::Region::EnterNotify();
+  Register_(this);
   std::set<cyclus::Agent*>::iterator ait;
   for (ait = cyclus::Agent::children().begin();
        ait != cyclus::Agent::children().end();
@@ -52,9 +53,20 @@ void GrowthRegion::DecomNotify(Agent* a) {
   Unregister_(a);
 }
 
+
+
 void GrowthRegion::Register_(cyclus::Agent* agent) {
   using cyclus::toolkit::CommodityProducerManager;
+  using cyclus::toolkit::CommodityProducer;
   using cyclus::toolkit::Builder;
+
+  CommodityProducer* cp_cast = dynamic_cast<CommodityProducer*>(agent);
+  if (cp_cast != NULL){
+    LOG(cyclus::LEV_INFO3, "mani") << "Registering agent "
+                                   << agent->prototype() << agent->id()
+                                   << " as a commodity producer.";
+    CommodityProducerManager::Register(cp_cast);
+  }
 
   CommodityProducerManager* cpm_cast =
       dynamic_cast<CommodityProducerManager*>(agent);
@@ -89,6 +101,28 @@ void GrowthRegion::Unregister_(cyclus::Agent* agent) {
 }
 
 void GrowthRegion::Tick() {
+  // registers agents in the region as commodity supplier
+  std::set<cyclus::Agent*>::iterator ait;
+  std::set<cyclus::Agent*>::iterator bit;
+  for (ait = cyclus::Agent::children().begin();
+       ait != cyclus::Agent::children().end();
+       ++ait) {
+        Agent* a = *ait;
+    for (bit = a->children().begin();
+         bit != a->children().end();
+         ++bit){
+         Agent* b = *bit;
+      if (b->enter_time() == context()->time()){
+        std::cout << "Agent entering now will be registered: " << b->prototype();
+        Register_(b);
+      if (b->exit_time() == context()->time()){
+        std::cout << "Agent exiting now will be unregistered: " << b->prototype();
+        Unregister_(b);
+      }
+      }
+    }
+  }
+
   double demand, supply, unmetdemand;
   cyclus::toolkit::Commodity commod;
   int time = context()->time();
@@ -153,6 +187,6 @@ void GrowthRegion::OrderBuilds(cyclus::toolkit::Commodity& commodity,
 
 extern "C" cyclus::Agent* ConstructGrowthRegion(cyclus::Context* ctx) {
   return new GrowthRegion(ctx);
-}
+  }
 
-}  // namespace cycamore
+} // namespace cycamore
