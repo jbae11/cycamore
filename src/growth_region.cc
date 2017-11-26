@@ -88,7 +88,13 @@ void GrowthRegion::Register_(cyclus::Agent* agent) {
 
 void GrowthRegion::Unregister_(cyclus::Agent* agent) {
   using cyclus::toolkit::CommodityProducerManager;
+  using cyclus::toolkit::CommodityProducer;
   using cyclus::toolkit::Builder;
+
+  CommodityProducer* cp_cast = dynamic_cast<CommodityProducer*>(agent);
+  if (cp_cast != NULL){
+    CommodityProducerManager::Unregister(cp_cast);
+  }
 
   CommodityProducerManager* cpm_cast =
     dynamic_cast<CommodityProducerManager*>(agent);
@@ -98,6 +104,25 @@ void GrowthRegion::Unregister_(cyclus::Agent* agent) {
   Builder* b_cast = dynamic_cast<Builder*>(agent);
   if (b_cast != NULL)
     buildmanager_.Unregister(b_cast);
+}
+
+void GrowthRegion::Tock(){
+  std::set<cyclus::Agent*>::iterator ait;
+  std::set<cyclus::Agent*>::iterator bit;
+  for (ait = cyclus::Agent::children().begin();
+       ait != cyclus::Agent::children().end();
+       ++ait) {
+        Agent* a = *ait;
+    for (bit = a->children().begin();
+         bit != a->children().end();
+         ++bit){
+         Agent* b = *bit;
+      if (b->exit_time() == context()->time()){
+        std::cout << "Agent exiting now will be unregistered: " << b->prototype();
+        Unregister_(b);
+      }
+      }
+  }
 }
 
 void GrowthRegion::Tick() {
@@ -115,10 +140,6 @@ void GrowthRegion::Tick() {
       if (b->enter_time() == context()->time()){
         std::cout << "Agent entering now will be registered: " << b->prototype();
         Register_(b);
-      if (b->exit_time() == context()->time()){
-        std::cout << "Agent exiting now will be unregistered: " << b->prototype();
-        Unregister_(b);
-      }
       }
     }
   }

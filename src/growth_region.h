@@ -60,6 +60,8 @@ class GrowthRegion
   /// @param time is the time to perform the tick
   virtual void Tick();
 
+  virtual void Tock();
+
   /// enter the simulation and register any children present
   virtual void EnterNotify();
 
