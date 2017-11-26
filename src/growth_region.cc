@@ -109,19 +109,20 @@ void GrowthRegion::Unregister_(cyclus::Agent* agent) {
 void GrowthRegion::Tock(){
   std::set<cyclus::Agent*>::iterator ait;
   std::set<cyclus::Agent*>::iterator bit;
+  bool inst_exit = false;
   for (ait = cyclus::Agent::children().begin();
        ait != cyclus::Agent::children().end();
        ++ait) {
-        Agent* a = *ait;
+    Agent* a = *ait;
     for (bit = a->children().begin();
          bit != a->children().end();
          ++bit){
-         Agent* b = *bit;
+      Agent* b = *bit;
       if (b->exit_time() == context()->time()){
         std::cout << "Agent exiting now will be unregistered: " << b->prototype();
         Unregister_(b);
       }
-      }
+    }
   }
 }
 
@@ -132,11 +133,11 @@ void GrowthRegion::Tick() {
   for (ait = cyclus::Agent::children().begin();
        ait != cyclus::Agent::children().end();
        ++ait) {
-        Agent* a = *ait;
+    Agent* a = *ait;
     for (bit = a->children().begin();
          bit != a->children().end();
          ++bit){
-         Agent* b = *bit;
+      Agent* b = *bit;
       if (b->enter_time() == context()->time()){
         std::cout << "Agent entering now will be registered: " << b->prototype();
         Register_(b);
