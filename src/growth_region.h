@@ -123,6 +123,11 @@ class GrowthRegion
   /// facilities be built
   void AddCommodityDemand_(std::string commod, Demand& demand);
 
+  /// Recursively calls the function Register_ on all descendants of this GrowthRegion agent
+  void Recursive_Register(cyclus::Agent* a);
+
+  void Recursive_Unregister(cyclus::Agent* a);
+
   /// orders builds given a commodity and an unmet demand for production
   /// capacity of that commodity
   /// @param commodity the commodity being demanded

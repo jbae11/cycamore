@@ -33,13 +33,6 @@ void GrowthRegion::AddCommodityDemand_(std::string commod,
 void GrowthRegion::EnterNotify() {
   cyclus::Region::EnterNotify();
   Register_(this);
-  std::set<cyclus::Agent*>::iterator ait;
-  for (ait = cyclus::Agent::children().begin();
-       ait != cyclus::Agent::children().end();
-       ++ait) {
-    Agent* a = *ait;
-    Register_(a);
-  }
 
   std::map<std::string, Demand>::iterator it;
   for (it = commodity_demand.begin(); it != commodity_demand.end(); ++it) {
@@ -60,21 +53,20 @@ void GrowthRegion::Register_(cyclus::Agent* agent) {
   using cyclus::toolkit::CommodityProducer;
   using cyclus::toolkit::Builder;
 
+  CommodityProducerManager* cpm_cast = dynamic_cast<CommodityProducerManager*>(agent);
+  if (cpm_cast != NULL){
+    LOG(cyclus::LEV_INFO3, "mani") << "Registering agent "
+                                   << agent->prototype() << agent->id()
+                                   << " as a commodity producer Manager.";
+    sdmanager_.RegisterProducerManager(cpm_cast);
+  }
+
   CommodityProducer* cp_cast = dynamic_cast<CommodityProducer*>(agent);
   if (cp_cast != NULL){
     LOG(cyclus::LEV_INFO3, "mani") << "Registering agent "
                                    << agent->prototype() << agent->id()
                                    << " as a commodity producer.";
     CommodityProducerManager::Register(cp_cast);
-  }
-
-  CommodityProducerManager* cpm_cast =
-      dynamic_cast<CommodityProducerManager*>(agent);
-  if (cpm_cast != NULL) {
-    LOG(cyclus::LEV_INFO3, "greg") << "Registering agent "
-                                   << agent->prototype() << agent->id()
-                                   << " as a commodity producer manager.";
-    sdmanager_.RegisterProducerManager(cpm_cast);
   }
 
   Builder* b_cast = dynamic_cast<Builder*>(agent);
@@ -91,15 +83,15 @@ void GrowthRegion::Unregister_(cyclus::Agent* agent) {
   using cyclus::toolkit::CommodityProducer;
   using cyclus::toolkit::Builder;
 
+  CommodityProducerManager* cpm_cast = dynamic_cast<CommodityProducerManager*>(agent);
+  if (cpm_cast != NULL){
+    sdmanager_.UnregisterProducerManager(cpm_cast);
+  }
+
   CommodityProducer* cp_cast = dynamic_cast<CommodityProducer*>(agent);
   if (cp_cast != NULL){
     CommodityProducerManager::Unregister(cp_cast);
   }
-
-  CommodityProducerManager* cpm_cast =
-    dynamic_cast<CommodityProducerManager*>(agent);
-  if (cpm_cast != NULL)
-    sdmanager_.UnregisterProducerManager(cpm_cast);
 
   Builder* b_cast = dynamic_cast<Builder*>(agent);
   if (b_cast != NULL)
@@ -107,43 +99,54 @@ void GrowthRegion::Unregister_(cyclus::Agent* agent) {
 }
 
 void GrowthRegion::Tock(){
+  Recursive_Unregister(this);
+}
+
+
+
+void GrowthRegion::Recursive_Unregister(cyclus::Agent* a){
+  // Unregisters the descendants of this GrowthRegion recursively.
   std::set<cyclus::Agent*>::iterator ait;
-  std::set<cyclus::Agent*>::iterator bit;
-  bool inst_exit = false;
-  for (ait = cyclus::Agent::children().begin();
-       ait != cyclus::Agent::children().end();
-       ++ait) {
-    Agent* a = *ait;
-    for (bit = a->children().begin();
-         bit != a->children().end();
-         ++bit){
-      Agent* b = *bit;
-      if (b->exit_time() == context()->time()){
-        std::cout << "Agent exiting now will be unregistered: " << b->prototype();
-        Unregister_(b);
+  if  (a->children().begin() == a->children().end()){
+    return;
+  }
+  else{
+    for (ait = a->children().begin();
+         ait != a->children().end();
+         ++ait){
+      Agent* child = *ait;
+      if (child->exit_time() == context()->time()){
+        std::cout << "Agent exiting now will be unregistered: " << child->prototype() << std::endl;
+        Unregister_(child);
       }
+      Recursive_Unregister(child);
+    }
+  }
+}
+
+void GrowthRegion::Recursive_Register(cyclus::Agent* a){
+  // Registers the descendants of this GrowthRegion recursively.
+  std::set<cyclus::Agent*>::iterator ait;
+  if  (a->children().begin() == a->children().end()){
+    return;
+  }
+  else{
+    for (ait = a->children().begin();
+         ait != a->children().end();
+         ++ait){
+      Agent* child = *ait;
+      if (child->enter_time() == context()->time()){
+        std::cout << "Agent entering now will be registered: " << child->prototype() << std::endl;
+        Register_(child);
+      }
+      Recursive_Register(child);
     }
   }
 }
 
 void GrowthRegion::Tick() {
   // registers agents in the region as commodity supplier
-  std::set<cyclus::Agent*>::iterator ait;
-  std::set<cyclus::Agent*>::iterator bit;
-  for (ait = cyclus::Agent::children().begin();
-       ait != cyclus::Agent::children().end();
-       ++ait) {
-    Agent* a = *ait;
-    for (bit = a->children().begin();
-         bit != a->children().end();
-         ++bit){
-      Agent* b = *bit;
-      if (b->enter_time() == context()->time()){
-        std::cout << "Agent entering now will be registered: " << b->prototype();
-        Register_(b);
-      }
-    }
-  }
+  Recursive_Register(this);
 
   double demand, supply, unmetdemand;
   cyclus::toolkit::Commodity commod;
