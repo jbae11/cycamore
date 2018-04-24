@@ -37,7 +37,7 @@ typedef std::vector<
 /// @warning The growth region is experimental
 
 class GrowthRegion : public cyclus::Region,
-  public cyclus::toolkit::CommodityProducerManager
+  public cyclus::toolkit::CommodityProducerManager,
   public cyclus::toolkit::Position {
   friend class GrowthRegionTests;
  public:
