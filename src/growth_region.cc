@@ -103,12 +103,10 @@ void GrowthRegion::Unregister_(cyclus::Agent* agent) {
     dynamic_cast<CommodityProducerManager*>(agent);
   if (cpm_cast != NULL)
     sdmanager_.UnregisterProducerManager(cpm_cast);
-  }
 
   CommodityProducer* cp_cast = dynamic_cast<CommodityProducer*>(agent);
-  if (cp_cast != NULL){
+  if (cp_cast != NULL)
     CommodityProducerManager::Unregister(cp_cast);
-  }
 
   Builder* b_cast = dynamic_cast<Builder*>(agent);
   if (b_cast != NULL)
