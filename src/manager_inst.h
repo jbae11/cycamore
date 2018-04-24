@@ -13,7 +13,8 @@ namespace cycamore {
 class ManagerInst
     : public cyclus::Institution,
       public cyclus::toolkit::CommodityProducerManager,
-      public cyclus::toolkit::Builder {
+      public cyclus::toolkit::Builder,
+      public cyclus::toolkit::Position {
  public:
   /// Default constructor
   ManagerInst(cyclus::Context* ctx);
@@ -32,24 +33,12 @@ class ManagerInst
   /// enter the simulation and register any children present
   virtual void EnterNotify();
 
-  /// register a new child
-  virtual void BuildNotify(Agent* m);
-
-  /// unregister a child
-  virtual void DecomNotify(Agent* m);
-
   /// write information about a commodity producer to a stream
   /// @param producer the producer
   void WriteProducerInformation(cyclus::toolkit::CommodityProducer*
                                 producer);
 
  private:
-  /// register a child
-  void Register_(cyclus::Agent* agent);
-
-  /// unregister a child
-  void Unregister_(cyclus::Agent* agent);
-
   #pragma cyclus var { \
     "tooltip": "producer facility prototypes",                          \
     "uilabel": "Producer Prototype List",                               \
@@ -59,6 +48,27 @@ class ManagerInst
     "implements the cyclus::toolkit::CommodityProducer interface",      \
     }
   std::vector<std::string> prototypes;
+
+  #pragma cyclus var { \
+    "default": 0.0, \
+    "uilabel": "Geographical latitude in degrees as a double", \
+    "doc": "Latitude of the agent's geographical position. The value should " \
+           "be expressed in degrees as a double." \
+  }
+  double latitude;
+
+  #pragma cyclus var { \
+    "default": 0.0, \
+    "uilabel": "Geographical longitude in degrees as a double", \
+    "doc": "Longitude of the agent's geographical position. The value should " \
+           "be expressed in degrees as a double." \
+  }
+  double longitude;
+
+  cyclus::toolkit::Position coordinates;
+
+  /// Records an agent's latitude and longitude to the output db
+  void RecordPosition();
 };
 
 }  // namespace cycamore

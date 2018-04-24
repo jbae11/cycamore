@@ -22,7 +22,11 @@ Reactor::Reactor(cyclus::Context* ctx)
       cycle_step(0),
       power_cap(0),
       power_name("power"),
-      discharged(false) { }
+      discharged(false),
+      latitude(0.0),
+      longitude(0.0),
+      coordinates(latitude, longitude) {}
+
 
 #pragma cyclus def clone cycamore::Reactor
 
@@ -92,6 +96,7 @@ void Reactor::EnterNotify() {
   if (ss.str().size() > 0) {
     throw cyclus::ValueError(ss.str());
   }
+  RecordPosition();
 }
 
 bool Reactor::CheckDecommissionCondition() {
@@ -109,29 +114,7 @@ void Reactor::Tick() {
   if (retired()) {
     Record("RETIRED", "");
 
-    // record the last time series entry if the reactor was operating at the
-    // time of retirement.
-    if (exit_time() == context()->time()) {
-      if (refuel_time == 0){
-        if (cycle_step > 0 && cycle_step <= cycle_time &&
-          core.count() == n_assem_core) {
-        cyclus::toolkit::RecordTimeSeries<cyclus::toolkit::POWER>(this, power_cap);
-      } else {
-        cyclus::toolkit::RecordTimeSeries<cyclus::toolkit::POWER>(this, 0);
-      }
-      } else{
-        if (cycle_step > 0 && cycle_step < cycle_time &&
-          core.count() == n_assem_core) {
-        cyclus::toolkit::RecordTimeSeries<cyclus::toolkit::POWER>(this, power_cap);
-      } 
-        else {
-        cyclus::toolkit::RecordTimeSeries<cyclus::toolkit::POWER>(this, 0);
-      }  
-      }
-      
-    }
-
-    if (context()->time() == exit_time()) { // only need to transmute once
+    if (context()->time() == exit_time() + 1) { // only need to transmute once
       Transmute(ceil(static_cast<double>(n_assem_core) / 2.0));
     }
     while (core.count() > 0) {
@@ -253,6 +236,7 @@ void Reactor::GetMatlTrades(
     std::string commod = trades[i].request->commodity();
     Material::Ptr m = mats[commod].back();
     mats[commod].pop_back();
+    cyclus::toolkit::RecordTimeSeries<double>("UsedFuel", this, m->quantity());
     responses.push_back(std::make_pair(trades[i], m));
     res_indexes.erase(m->obj_id());
   }
@@ -510,6 +494,18 @@ void Reactor::Record(std::string name, std::string val) {
       ->AddVal("Time", context()->time())
       ->AddVal("Event", name)
       ->AddVal("Value", val)
+      ->Record();
+}
+
+void Reactor::RecordPosition() {
+  std::string specification = this->spec();
+  context()
+      ->NewDatum("AgentPosition")
+      ->AddVal("Spec", specification)
+      ->AddVal("Prototype", this->prototype())
+      ->AddVal("AgentId", id())
+      ->AddVal("Latitude", latitude)
+      ->AddVal("Longitude", longitude)
       ->Record();
 }
 

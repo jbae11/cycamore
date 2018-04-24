@@ -4,28 +4,17 @@
 namespace cycamore {
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-ManagerInst::ManagerInst(cyclus::Context* ctx) : cyclus::Institution(ctx) { }
+ManagerInst::ManagerInst(cyclus::Context* ctx)
+      : cyclus::Institution(ctx),
+        latitude(0.0),
+        longitude(0.0),
+        coordinates(latitude, longitude) {}
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 ManagerInst::~ManagerInst() {}
 
-void ManagerInst::BuildNotify(Agent* a) {
-  Register_(a);
-}
-
-void ManagerInst::DecomNotify(Agent* a) {
-  Unregister_(a);
-}
-
 void ManagerInst::EnterNotify() {
   cyclus::Institution::EnterNotify();
-  std::set<cyclus::Agent*>::iterator sit;
-  for (sit = cyclus::Agent::children().begin();
-       sit != cyclus::Agent::children().end();
-       ++sit) {
-    Agent* a = *sit;
-    Register_(a);
-  }
 
   using cyclus::toolkit::CommodityProducer;
   std::vector<std::string>::iterator vit;
@@ -39,28 +28,7 @@ void ManagerInst::EnterNotify() {
       Builder::Register(cp_cast);
     }
   }
-}
-
-void ManagerInst::Register_(Agent* a) {
-  using cyclus::toolkit::CommodityProducer;
-  using cyclus::toolkit::CommodityProducerManager;
-
-  CommodityProducer* cp_cast = dynamic_cast<CommodityProducer*>(a);
-  if (cp_cast != NULL) {
-    LOG(cyclus::LEV_INFO3, "mani") << "Registering agent "
-                                   << a->prototype() << a->id()
-                                   << " as a commodity producer.";
-    CommodityProducerManager::Register(cp_cast);
-  }
-}
-
-void ManagerInst::Unregister_(Agent* a) {
-  using cyclus::toolkit::CommodityProducer;
-  using cyclus::toolkit::CommodityProducerManager;
-
-  CommodityProducer* cp_cast = dynamic_cast<CommodityProducer*>(a);
-  if (cp_cast != NULL)
-    CommodityProducerManager::Unregister(cp_cast);
+  RecordPosition();
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -82,6 +50,18 @@ void ManagerInst::WriteProducerInformation(
     LOG(cyclus::LEV_DEBUG3, "maninst") << "               cost: " <<
                                        producer->Cost(*it);
   }
+}
+
+void ManagerInst::RecordPosition() {
+  std::string specification = this->spec();
+  context()
+      ->NewDatum("AgentPosition")
+      ->AddVal("Spec", specification)
+      ->AddVal("Prototype", this->prototype())
+      ->AddVal("AgentId", id())
+      ->AddVal("Latitude", latitude)
+      ->AddVal("Longitude", longitude)
+      ->Record();
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -

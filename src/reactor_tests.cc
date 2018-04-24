@@ -176,6 +176,38 @@ TEST(ReactorTests, DecomTimes) {
 }
 
 
+// Tests if a reactor produces power at the time of its decommission
+// given a refuel_time of zero.
+TEST(ReactorTests, DecomZeroRefuel) {
+  std::string config = 
+     "  <fuel_inrecipes>  <val>uox</val>      </fuel_inrecipes>  "
+     "  <fuel_outrecipes> <val>spentuox</val> </fuel_outrecipes>  "
+     "  <fuel_incommods>  <val>uox</val>      </fuel_incommods>  "
+     "  <fuel_outcommods> <val>waste</val>    </fuel_outcommods>  "
+     ""
+     "  <cycle_time>2</cycle_time>  "
+     "  <refuel_time>0</refuel_time>  "
+     "  <assem_size>1</assem_size>  "
+     "  <n_assem_core>3</n_assem_core>  "
+     "  <power_cap>1000</power_cap>  "
+     "  <n_assem_batch>1</n_assem_batch>  ";
+
+  int simdur = 8;
+  int lifetime = 6;
+  cyclus::MockSim sim(cyclus::AgentSpec(":cycamore:Reactor"), config, simdur, lifetime);
+  sim.AddSource("uox").Finalize();
+  sim.AddRecipe("uox", c_uox());
+  sim.AddRecipe("spentuox", c_spentuox());
+  int id = sim.Run();
+
+  // operating for 2+2 months and shutdown for 2+1
+  int on_time = 6;
+  std::vector<Cond> conds;
+  conds.push_back(Cond("Value", "==", 1000));
+  QueryResult qr = sim.db().Query("TimeSeriesPower", &conds);
+  EXPECT_EQ(on_time, qr.rows.size());
+}
+
 // tests that new fuel is ordered immediately following cycle end - at the
 // start of the refueling period - not before and not after. - thie is subtly
 // different than RefuelTimes test and is not a duplicate of it.
@@ -557,6 +589,60 @@ TEST(ReactorTests, Retire) {
   qr = sim.db().Query("TimeSeriesPower", &conds);
   EXPECT_EQ(time_online, qr.rows.size())
       << "failed to generate power for the correct number of time steps";
+}
+
+TEST(ReactorTests, PositionInitialize) {
+  std::string config = 
+     "  <fuel_inrecipes>  <val>lwr_fresh</val>  </fuel_inrecipes>  "
+     "  <fuel_outrecipes> <val>lwr_spent</val>  </fuel_outrecipes>  "
+     "  <fuel_incommods>  <val>enriched_u</val> </fuel_incommods>  "
+     "  <fuel_outcommods> <val>waste</val>      </fuel_outcommods>  "
+     "  <fuel_prefs>      <val>1.0</val>        </fuel_prefs>  "
+     ""
+     "  <cycle_time>1</cycle_time>  "
+     "  <refuel_time>0</refuel_time>  "
+     "  <assem_size>300</assem_size>  "
+     "  <n_assem_core>1</n_assem_core>  "
+     "  <n_assem_batch>1</n_assem_batch>  ";
+
+  int simdur = 50;
+  cyclus::MockSim sim(cyclus::AgentSpec(":cycamore:Reactor"), config, simdur);
+  sim.AddSource("enriched_u").Finalize();
+  sim.AddRecipe("lwr_fresh", c_uox());
+  sim.AddRecipe("lwr_spent", c_spentuox());
+  int id = sim.Run();
+
+  QueryResult qr = sim.db().Query("AgentPosition", NULL);
+  EXPECT_EQ(qr.GetVal<double>("Latitude"), 0.0);
+  EXPECT_EQ(qr.GetVal<double>("Longitude"), 0.0);
+}
+
+TEST(ReactorTests, PositionInitialize2) {
+  std::string config = 
+     "  <fuel_inrecipes>  <val>lwr_fresh</val>  </fuel_inrecipes>  "
+     "  <fuel_outrecipes> <val>lwr_spent</val>  </fuel_outrecipes>  "
+     "  <fuel_incommods>  <val>enriched_u</val> </fuel_incommods>  "
+     "  <fuel_outcommods> <val>waste</val>      </fuel_outcommods>  "
+     "  <fuel_prefs>      <val>1.0</val>        </fuel_prefs>  "
+     ""
+     "  <cycle_time>1</cycle_time>  "
+     "  <refuel_time>0</refuel_time>  "
+     "  <assem_size>300</assem_size>  "
+     "  <n_assem_core>1</n_assem_core>  "
+     "  <n_assem_batch>1</n_assem_batch>  "
+     "  <longitude>30.0</longitude>  "
+     "  <latitude>30.0</latitude>  ";
+
+  int simdur = 50;
+  cyclus::MockSim sim(cyclus::AgentSpec(":cycamore:Reactor"), config, simdur);
+  sim.AddSource("enriched_u").Finalize();
+  sim.AddRecipe("lwr_fresh", c_uox());
+  sim.AddRecipe("lwr_spent", c_spentuox());
+  int id = sim.Run();
+
+  QueryResult qr = sim.db().Query("AgentPosition", NULL);
+  EXPECT_EQ(qr.GetVal<double>("Latitude"), 30.0);
+  EXPECT_EQ(qr.GetVal<double>("Longitude"), 30.0);
 }
 
 } // namespace reactortests
