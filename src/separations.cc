@@ -113,6 +113,7 @@ void Separations::Tick() {
   StreamSet::iterator it;
   double maxfrac = 1;
   std::map<std::string, Material::Ptr> stagedsep;
+  Record("Separating", orig_qty, "UNF");
   for (it = streams_.begin(); it != streams_.end(); ++it) {
     Stream info = it->second;
     std::string name = it->first;
@@ -130,6 +131,7 @@ void Separations::Tick() {
     if (m->quantity() > 0) {
       streambufs[name].Push(
           mat->ExtractComp(m->quantity() * maxfrac, m->comp()));
+      Record("Separated", m->quantity() * maxfrac, name);
     }
   }
 
@@ -357,6 +359,17 @@ void Separations::RecordPosition() {
       ->AddVal("AgentId", id())
       ->AddVal("Latitude", latitude)
       ->AddVal("Longitude", longitude)
+      ->Record();
+}
+
+void Separations::Record(std::string name, double val, std::string type) {
+  context()
+      ->NewDatum("SeparationEvents")
+      ->AddVal("AgentId", id())
+      ->AddVal("Time", context()->time())
+      ->AddVal("Event", name)
+      ->AddVal("Value", val)
+      ->AddVal("Type", type)
       ->Record();
 }
 
