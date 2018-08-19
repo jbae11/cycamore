@@ -125,7 +125,7 @@ void Reactor::Tick() {
     Record("RETIRED", "");
 
     if (context()->time() == exit_time() + 1) { // only need to transmute once
-      Transmute(ceil(static_cast<double>(n_assem_core) / 2.0));
+      Transmute(ceil(static_cast<double>(n_assem_core)));
     }
     while (core.count() > 0) {
       if (!Discharge()) {
