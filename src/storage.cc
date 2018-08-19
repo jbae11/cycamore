@@ -124,6 +124,10 @@ void Storage::Tick() {
         << " has capacity for " << current_capacity() << " kg of material.";
   }
   LOG(cyclus::LEV_INFO3, "ComCnv") << "}";
+  Record("Cooling tick", inventory.quantity() + processing.quantity());
+  Record("Now Cooled tick", ready.quantity());
+  Record("Cooled tick", ready.quantity() + stocks.quantity());
+
 }
 
 //- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -138,7 +142,8 @@ void Storage::Tock() {
 
   ProcessMat_(throughput);  // place ready into stocks
   Record("Cooling", inventory.quantity() + processing.quantity());
-  Record("Now Cooled", ready.quantity() + stocks.quantity());
+  Record("Now Cooled", ready.quantity());
+  Record("Cooled", ready.quantity() + stocks.quantity());
   LOG(cyclus::LEV_INFO3, "ComCnv") << "}";
 }
 
