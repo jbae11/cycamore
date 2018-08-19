@@ -233,6 +233,7 @@ class Storage
   cyclus::toolkit::Position coordinates;
 
   void RecordPosition();
+  void Record(std::string status, double qty);
 
   friend class StorageTest;
 };

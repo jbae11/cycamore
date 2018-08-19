@@ -137,7 +137,8 @@ void Storage::Tock() {
   }
 
   ProcessMat_(throughput);  // place ready into stocks
-
+  Record("Cooling", inventory.quantity() + processing.quantity());
+  Record("Now Cooled", ready.quantity() + stocks.quantity());
   LOG(cyclus::LEV_INFO3, "ComCnv") << "}";
 }
 
@@ -235,6 +236,17 @@ void Storage::RecordPosition() {
       ->AddVal("AgentId", id())
       ->AddVal("Latitude", latitude)
       ->AddVal("Longitude", longitude)
+      ->Record();
+}
+
+void Storage::Record(std::string status, double qty) {
+  std::string specification = this->spec();
+  context()
+      ->NewDatum("storageinventory")
+      ->AddVal("prototype", this->prototype())
+      ->AddVal("status", status)
+      ->AddVal("quantity", qty)
+      ->AddVal("time", context()->time())
       ->Record();
 }
 
