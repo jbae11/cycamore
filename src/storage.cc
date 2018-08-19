@@ -139,11 +139,11 @@ void Storage::Tock() {
   if (ready_time() >= 0 || residence_time == 0 && !inventory.empty()) {
     ReadyMatl_(ready_time());  // place processing into ready
   }
-
-  ProcessMat_(throughput);  // place ready into stocks
   Record("Cooling", inventory.quantity() + processing.quantity());
   Record("Now Cooled", ready.quantity());
   Record("Cooled", ready.quantity() + stocks.quantity());
+
+  ProcessMat_(throughput);  // place ready into stocks
   LOG(cyclus::LEV_INFO3, "ComCnv") << "}";
 }
 
@@ -228,7 +228,7 @@ void Storage::ReadyMatl_(int time) {
     entry_times.pop_front();
     ++to_ready;
   }
-
+  
   ready.Push(processing.PopN(to_ready));
 }
 
