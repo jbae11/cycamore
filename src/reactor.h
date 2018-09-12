@@ -349,6 +349,15 @@ class Reactor : public cyclus::Facility,
   }
   std::string power_name;
 
+
+  /////////// Decommission transmutation behavior ///////////
+  #pragma cyclus var {"default": 0, \
+                      "uilabel": "Boolean for transmutation behavior upon decommissioning.", \
+                      "doc": "If true, the archetype transmutes all assemblies upon decommissioning " \
+                             "If false, the archetype only transmutes half.", \
+  }
+  bool decom_transmute_all;
+
   /////////// hybrid params ///////////
 
   #pragma cyclus var { \
@@ -370,6 +379,7 @@ class Reactor : public cyclus::Facility,
                       "doc": "True if reactor is a hybrid system (produces side products)", \
   }
   bool hybrid_;
+
 
 
   /////////// preference changes ///////////
@@ -397,6 +407,7 @@ class Reactor : public cyclus::Facility,
            "preference change times.", \
   }
   std::vector<double> pref_change_values;
+
 
   // Resource inventories - these must be defined AFTER/BELOW the member vars
   // referenced (e.g. n_batch_fresh, assem_size, etc.).
