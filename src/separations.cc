@@ -8,6 +8,7 @@ using cyclus::KeyError;
 using cyclus::ValueError;
 using cyclus::Request;
 using cyclus::CompMap;
+using cyclus::toolkit::RecordTimeSeries;
 
 namespace cycamore {
 
@@ -212,6 +213,7 @@ Separations::GetMatlRequests() {
   for (int i = 0; i < feed_commods.size(); i++) {
     std::string commod = feed_commods[i];
     double pref = feed_commod_prefs[i];
+    cyclus::toolkit::RecordTimeSeries<double>("demand"+commod, this, feed.space());
     reqs.push_back(port->AddRequest(m, this, commod, pref, exclusive));
   }
   port->AddMutualReqs(reqs);
@@ -298,6 +300,8 @@ std::set<cyclus::BidPortfolio<Material>::Ptr> Separations::GetMatlBids(
     }
 
     double tot_qty = streambufs[commod].quantity();
+    cyclus::toolkit::RecordTimeSeries<double>("supply"+commod, this,
+                                              tot_qty);
     cyclus::CapacityConstraint<Material> cc(tot_qty);
     port->AddConstraint(cc);
     ports.insert(port);
@@ -329,7 +333,8 @@ std::set<cyclus::BidPortfolio<Material>::Ptr> Separations::GetMatlBids(
         }
       }
     }
-
+    cyclus::toolkit::RecordTimeSeries<double>("supply"+leftover_commod,
+                                              this, leftover.quantity());
     cyclus::CapacityConstraint<Material> cc(leftover.quantity());
     port->AddConstraint(cc);
     ports.insert(port);
