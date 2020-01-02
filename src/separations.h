@@ -160,7 +160,7 @@ class Separations
            "the other separations streams.", \
     "uitype": "outcommodity", \
     "uilabel": "Leftover Commodity", \
-    "default": "default-waste-stream", \
+    "default": "default_waste_stream", \
   }
   std::string leftover_commod;
 
