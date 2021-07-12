@@ -1,0 +1,153 @@
+<simulation>
+
+  <archetypes>
+    <spec>
+      <lib>agents</lib>
+      <name>NullRegion</name>
+    </spec>
+    <spec>
+      <lib>agents</lib>
+      <name>NullInst</name>
+    </spec>
+    <spec>
+      <lib>cycamore</lib>
+      <name>Sink</name>
+    </spec>
+    <spec>
+      <lib>cycamore</lib>
+      <name>Source</name>
+    </spec>
+  <spec>
+    <lib>cycamore</lib>
+    <name>Enrichment</name>
+  </spec>
+    <spec>
+      <lib>cycamore</lib>
+      <name>GeneralFacility</name>
+    </spec>
+  </archetypes>
+
+  <control>
+    <duration>10</duration>
+    <startmonth>1</startmonth>
+    <startyear>2000</startyear>
+    <decay>manual</decay>
+  </control>
+
+
+
+  <facility>
+    <config>
+      <GeneralFacility>
+        <power_name>power</power_name>
+        <json_path>/home/4ib/git/dinara/scripts/data.json</json_path>
+        <capacity>100</capacity>
+        <build_time>3</build_time>
+        <capacity_factor>0.92</capacity_factor>
+        <key_name>coal</key_name>
+      </GeneralFacility>
+    </config>
+    <name>genfac</name>
+  </facility>
+
+
+
+
+
+
+<facility>
+  <name>enrichment</name>
+  <config>
+    <Enrichment>
+      <feed_commod>natl_u</feed_commod>
+      <feed_recipe>natl_u</feed_recipe>
+      <product_commod>fuel</product_commod>
+      <tails_assay>0.003</tails_assay>
+      <tails_commod>waste</tails_commod>
+      <swu_capacity>1e100</swu_capacity>
+      <initial_feed>1e100</initial_feed>
+    </Enrichment>
+  </config>
+</facility>
+
+  <facility>
+    <name>sink</name>
+    <config>
+      <Sink>
+        <in_commods>
+          <val>unf</val>
+          <val>co2</val>
+          <val>waste_water</val>
+        </in_commods>
+      
+      </Sink>
+    </config>
+  </facility>
+
+  
+  <facility>
+    <name>source</name>
+    <config>
+      <Source>
+        <outcommod>natl_u</outcommod>
+      </Source>
+    </config>
+  </facility>
+
+<region>
+    <name>SingleRegion</name>
+    <config><NullRegion/></config>
+    <institution>
+      <name>SingleInstitution</name>
+      <initialfacilitylist>
+
+
+        <entry>
+          <prototype>sink</prototype>
+          <number>1</number>
+        </entry>
+
+        <entry>
+          <prototype>source</prototype>
+          <number>1</number>
+        </entry>
+
+        <entry>
+          <prototype>enrichment</prototype>
+          <number>1</number>
+        </entry>
+
+        <entry>
+          <prototype>genfac</prototype>
+          <number>1</number>
+        </entry>
+
+      </initialfacilitylist>
+      <config><NullInst/></config>
+    </institution>
+  </region>
+
+<recipe>
+  <name>fuel_recipe</name>
+  <basis>mass</basis>
+    <nuclide> <id>U-235</id> <comp>3</comp> </nuclide>
+    <nuclide> <id>U-238</id> <comp>97</comp> </nuclide>
+</recipe>
+
+<recipe>
+  <name>natl_u</name>
+  <basis>mass</basis>
+  <nuclide>
+    <id>U-235</id>
+    <comp>0.7</comp>
+  </nuclide>
+  <nuclide>
+    <id>U-238</id>
+    <comp>99.3</comp>
+  </nuclide>
+</recipe>
+
+</simulation>
+
+
+
